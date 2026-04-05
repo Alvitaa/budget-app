@@ -3,39 +3,94 @@
 import { ApiFetch } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { SubmitEvent, useState } from "react";
+
+type RegisterData = {
+    name: string;
+    email: string;
+    password: string;
+    repeatPassword: string;
+};
 
 export default function RegisterPage() {
     const router = useRouter();
 
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [repeatPassword, setRepeatPassword] = useState("");
-    const [error, setError] = useState("");
+    const [formData, setFormData] = useState<RegisterData>({
+        name: "",
+        email: "",
+        password: "",
+        repeatPassword: "",
+    });
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
 
-    async function handleSubmit(e: React.SubmitEvent) {
+    function validateFrontend(data: RegisterData) {
+        const newErrors = {} as any;
+
+        // Nombre
+        if (!data.name || typeof data.name !== "string") {
+            newErrors.name = ["Name is required"];
+        }
+
+        // Email
+        if (!data.email || !/\S+@\S+\.\S+/.test(data.email)) {
+            newErrors.email = ["Invalid email address"];
+        }
+
+        // Password
+        if (!data.password || data.password.length < 8) {
+            newErrors.password = ["Password must be at least 8 characters long"];
+        }
+
+        // Repeat password
+        if (!data.repeatPassword) {
+            newErrors.repeatPassword = ["Please confirm your password"];
+        } else if (data.password !== data.repeatPassword) {
+            newErrors.repeatPassword = ["Passwords do not match"];
+        }
+
+        return Object.keys(newErrors).length > 0 ? newErrors : null;
+    }
+
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const { name, value } = e.target;
+
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+
+        setErrors((prev) => ({
+            ...prev,
+            [name]: [""],
+        }));
+    }
+
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
-        setError("");
+        setErrors({});
 
-        if (password !== repeatPassword) {
-            return setError("Las contraseñas no coinciden");
+        const formErrors = validateFrontend(formData);
+        if (formErrors) {
+            setErrors(formErrors);
+            return;
         }
 
         try {
-            await ApiFetch("/auth/register", {
+            await ApiFetch("auth/register", {
                 method: "POST",
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password,
-                    repeatPassword,
-                }),
+                body: JSON.stringify(formData),
             });
 
             router.push("/login");
         } catch (err: any) {
-            setError(err.message);
+            if (err.errors) {
+                console.log(err.errors);
+                setErrors(err.errors);
+            } else {
+                setErrors({
+                    general: [err.message || "Something went wrong"],
+                });
+            }
         }
     }
 
@@ -49,35 +104,47 @@ export default function RegisterPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <input
                         type="text"
+                        name="name"
                         placeholder="Nombre"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        value={formData.name}
+                        onChange={handleChange}
                     />
+                    {errors.name && <p className="text-red-600 text-sm">{errors.name[0]}</p>}
 
                     <input
                         type="email"
+                        name="email"
                         placeholder="Email"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        value={formData.email}
+                        onChange={handleChange}
                     />
+                    {errors.email && <p className="text-red-600 text-sm">{errors.email[0]}</p>}
 
                     <input
                         type="password"
+                        name="password"
                         placeholder="Password"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        value={formData.password}
+                        onChange={handleChange}
                     />
+                    {errors.password && <p className="text-red-600 text-sm">{errors.password[0]}</p>}
 
                     <input
                         type="password"
-                        placeholder="Password"
+                        name="repeatPassword"
+                        placeholder="Repeat Password"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                        value={repeatPassword}
-                        onChange={(e) => setRepeatPassword(e.target.value)}
+                        value={formData.repeatPassword}
+                        onChange={handleChange}
                     />
+                    {errors.repeatPassword && <p className="text-red-600 text-sm">{errors.repeatPassword[0]}</p>}
+
+                    {errors.general && (
+                        <p className="text-sm text-red-600">{errors.general}</p>
+                    )}
 
                     <button
                         type="submit"
