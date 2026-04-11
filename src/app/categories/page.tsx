@@ -22,7 +22,6 @@ export default function CategoriesPage() {
 			const data = await apiFetch("categories", {
 				method: "GET",
 			})
-			console.log(data);
 			setCategories(data);
 		} catch (e) {
 			console.error("Error cargando categorías: ", e);
