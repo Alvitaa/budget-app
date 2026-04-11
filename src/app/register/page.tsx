@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiFetch } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SubmitEvent, useState } from "react";
@@ -76,7 +76,7 @@ export default function RegisterPage() {
         }
 
         try {
-            await ApiFetch("auth/register", {
+            await apiFetch("auth/register", {
                 method: "POST",
                 body: JSON.stringify(formData),
             });

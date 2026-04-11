@@ -22,10 +22,20 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="space-y-2">
-        <p className="text-gray-600">
-          Esta es una ruta protegida.
-        </p>
+      <div className="flex gap-4">
+        <button
+          onClick={() => router.push("/categories")}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Ver Categorías
+        </button>
+
+        <button
+          onClick={() => router.push("/accounts")}
+          className="px-4 py-2 bg-green-500 text-white rounded"
+        >
+          Ver Cuentas
+        </button>
       </div>
     </div>
   );

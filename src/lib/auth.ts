@@ -1,5 +1,6 @@
 export function setToken(token: string) {
-  document.cookie = `token=${token}; path=/`;
+  const maxAge = 60 * 69 * 24 * 7; // 7 días
+  document.cookie = `token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
 export function removeToken() {

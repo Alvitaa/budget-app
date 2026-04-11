@@ -1,10 +1,10 @@
 "use client";
 
-import { ApiFetch } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { setToken } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { SubmitEvent, useState } from "react";
 
 export default function LoginPage() {
     const router = useRouter();
@@ -13,11 +13,11 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
 
-    async function handleSubmit(e: React.SubmitEvent) {
+    async function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
 
         try {
-            const data = await ApiFetch("auth/login", {
+            const data = await apiFetch("auth/login", {
                 method: "POST",
                 body: JSON.stringify({ email, password })
             });

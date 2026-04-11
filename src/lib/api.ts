@@ -1,8 +1,8 @@
 const API_URL = "http://localhost:3009/";
 
-export async function ApiFetch(endpoint: string, options?: RequestInit) {
-    console.log(`${API_URL}${endpoint}`);
+export async function apiFetch(endpoint: string, options?: RequestInit) {
     const res = await fetch(`${API_URL}${endpoint}`, {
+        credentials: 'include',
         ...options,
         headers: {
             "Content-type": "application/json",
@@ -11,10 +11,11 @@ export async function ApiFetch(endpoint: string, options?: RequestInit) {
     });
 
     const data = await res.json();
+    console.log(data);
 
     if (!res.ok) {
         const error: any = new Error("Request failed");
-        error.errors = data.errors || {};
+        error.errors = data.error || data.errors || {};
         throw error;
     }
 
