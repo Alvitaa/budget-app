@@ -16,7 +16,7 @@ export default function Modal({ isOpen, onClose, children, title}: ModalProps) {
             <div className="bg-white rounded-lg w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">{title}</h2>
-                    <button onClick={onClose}><CgClose /></button>
+                    <button onClick={onClose} className="cursor-pointer"><CgClose /></button>
                 </div>
 
                 {children}

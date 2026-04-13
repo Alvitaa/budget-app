@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 export default function DashboardPage() {
 	const router = useRouter();
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [mounted, setMounted] = useState(false);
 
@@ -37,12 +38,18 @@ export default function DashboardPage() {
 		setIsModalOpen(true);
 	}
 
+	function confirmDelete(transaction: Transaction) {
+		setSelectedTransaction(transaction);
+		setIsDeleteModalOpen(true);
+	}
+
 	async function handleDelete(id: string) {
 		try {
 			await apiFetch(`transactions/${id}`, {
 				method: "DELETE",
 			});
 
+			setIsDeleteModalOpen(false);
 			fetchTransactions();
 		} catch (error) {
 			console.error("Error eliminando el movimiento:", error)
@@ -146,10 +153,10 @@ export default function DashboardPage() {
 									<td className="p-2 border">{transaction.description ? transaction.description : "-"}</td>
 									<td className="p-2 border">{transaction.account ? transaction.account.name : "No especificada"}</td>
 									<td className="p-2 border flex gap-2">
-										<button onClick={() => handleEdit(transaction)} className="px-2 py-1 bg-yellow-400 rounded">
+										<button onClick={() => handleEdit(transaction)} className="px-2 py-1 bg-yellow-400 rounded cursor-pointer">
 											Editar
 										</button>
-										<button onClick={() => handleDelete(transaction.id)} className="px-2 py-1 bg-red-500 text-white rounded">
+										<button onClick={() => confirmDelete(transaction)} className="px-2 py-1 bg-red-500 text-white rounded cursor-pointer">
 											Eliminar
 										</button>
 									</td>
@@ -169,6 +176,22 @@ export default function DashboardPage() {
 				title={selectedTransaction ? "Editar" : "Crear"}
 			>
 				<TransactionForm initialData={selectedTransaction} onSubmit={handleSubmit} categories={categories} accounts={accounts} />
+			</Modal>
+
+			<Modal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				title="¿Estás seguro?"
+			>
+				<p>Esta acción es irreversible.</p>
+				<div className="flex place-content-around gap-5 mt-5">
+					<button onClick={() => handleDelete(selectedTransaction!.id)} className="px-2 py-2 w-full bg-red-500 rounded text-white font-bold cursor-pointer">
+						Sí, borrar
+					</button>
+					<button onClick={() => setIsDeleteModalOpen(false)} className="px-2 py-2 w-full bg-gray-200 rounded cursor-pointer">
+						No, cancelar
+					</button>
+				</div>
 			</Modal>
 		</div>
 	);
