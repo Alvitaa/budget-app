@@ -8,14 +8,16 @@ export type Transaction = {
     description: string | null;
     amount: number;
     type: TransactionType;
-    date: Date;
+    date: string;
     userId: string;
 
     category: {
-        name: string
+        id: string;
+        name: string;
     } | null;
 
     account: {
-        name: string
+        id: string;
+        name: string;
     } | null;
 }

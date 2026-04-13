@@ -156,7 +156,7 @@ export default function AccountsPage() {
 					</tbody>
 				</table>
 				:
-				<h2>There are no accounts. Create one!</h2>}
+				<h2>You have no accounts registered. Create one!</h2>}
 		</div>
 	)
 }

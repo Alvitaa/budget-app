@@ -1,5 +1,8 @@
 "use client";
 
+import TransactionForm from "@/components/transactions/TransactionForm";
+import Modal from "@/components/ui/modal/Modal";
+import { TransactionTypeLabels } from "@/constants/TransactionType";
 import { apiFetch } from "@/lib/api";
 import { removeToken } from "@/lib/auth";
 import { Transaction } from "@/types/transaction";
@@ -8,14 +11,63 @@ import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
 	const router = useRouter();
-	const [transactions, setTransactions] = useState([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
+	const [mounted, setMounted] = useState(false);
+
+	const [transactions, setTransactions] = useState([]);
+	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+	const [categories, setCategories] = useState([]);
+	const [accounts, setAccounts] = useState([]);
 	const [date, setDate] = useState(new Date());
 
 	function Logout() {
 		removeToken();
 		router.push("/login");
 		router.refresh();
+	}
+
+	function handleCreate() {
+		setSelectedTransaction(null);
+		setIsModalOpen(true);
+	}
+
+	function handleEdit(transaction: Transaction) {
+		setSelectedTransaction(transaction);
+		setIsModalOpen(true);
+	}
+
+	async function handleDelete(id: string) {
+		try {
+			await apiFetch(`transactions/${id}`, {
+				method: "DELETE",
+			});
+
+			fetchTransactions();
+		} catch (error) {
+			console.error("Error eliminando el movimiento:", error)
+		}
+	}
+
+	async function handleSubmit(data: any) {
+		if (selectedTransaction) {
+			await apiFetch(`transactions/${selectedTransaction.id}`, {
+				method: "PATCH",
+				body: JSON.stringify({
+					...data,
+					date: new Date(data.date).toISOString()
+				}),
+			});
+		} else {
+			console.log("Creando transacción...")
+			await apiFetch("transactions", {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
+		}
+
+		setIsModalOpen(false);
+		fetchTransactions();
 	}
 
 	async function fetchTransactions() {
@@ -35,6 +87,7 @@ export default function DashboardPage() {
 
 	useEffect(() => {
 		fetchTransactions();
+		setMounted(true);
 	}, [])
 
 	return (
@@ -48,6 +101,10 @@ export default function DashboardPage() {
 			</div>
 
 			<div className="flex gap-4">
+				<button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded">
+					+ Nuevo Movimiento
+				</button>
+
 				<button
 					onClick={() => router.push("/categories")}
 					className="px-4 py-2 bg-blue-500 text-white rounded"
@@ -81,18 +138,18 @@ export default function DashboardPage() {
 						<tbody>
 							{transactions.map((transaction: Transaction) => (
 								<tr key={transaction.id}>
-									<td className="p-2 border">{transaction.date.toDateString()}</td>
-									<td className="p-2 border">{transaction.type}</td>
+									<td className="p-2 border">{transaction.date.split("T")[0]}</td>
+									<td className="p-2 border">{TransactionTypeLabels[transaction.type]}</td>
 									<td className="p-2 border">{transaction.category ? transaction.category.name : "No especificada"}</td>
 									<td className="p-2 border">{transaction.title}</td>
 									<td className="p-2 border">{transaction.amount}</td>
-									<td className="p-2 border">{transaction.description}</td>
+									<td className="p-2 border">{transaction.description ? transaction.description : "-"}</td>
 									<td className="p-2 border">{transaction.account ? transaction.account.name : "No especificada"}</td>
 									<td className="p-2 border flex gap-2">
-										<button className="px-2 py-1 bg-yellow-400 rounded">
+										<button onClick={() => handleEdit(transaction)} className="px-2 py-1 bg-yellow-400 rounded">
 											Editar
 										</button>
-										<button className="px-2 py-1 bg-red-500 text-white rounded">
+										<button onClick={() => handleDelete(transaction.id)} className="px-2 py-1 bg-red-500 text-white rounded">
 											Eliminar
 										</button>
 									</td>
@@ -105,6 +162,14 @@ export default function DashboardPage() {
 					<h2>You have no transactions registered. Register one!</h2>
 				}
 			</div>
+
+			<Modal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				title={selectedTransaction ? "Editar" : "Crear"}
+			>
+				<TransactionForm initialData={selectedTransaction} onSubmit={handleSubmit} categories={categories} accounts={accounts} />
+			</Modal>
 		</div>
 	);
 }
