@@ -14,7 +14,6 @@ export default function DashboardPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
-	const [mounted, setMounted] = useState(false);
 
 	const [transactions, setTransactions] = useState([]);
 	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -88,40 +87,63 @@ export default function DashboardPage() {
 			setTransactions(data);
 			if (data.length > 0) setIsLoaded(true);
 		} catch (e) {
-			console.error("Error cargando transacciones:", e);
+			console.error("Error cargando movimientos:", e);
+		}
+	}
+
+	async function fetchAccounts() {
+		try {
+			const data = await apiFetch("accounts", {
+				method: "GET",
+			})
+			setAccounts(data);
+		} catch (e) {
+			console.error("Error cargando cuentas:", e);
+		}
+	}
+
+	async function fetchCategories() {
+		try {
+			const data = await apiFetch("categories", {
+				method: "GET",
+			})
+			setCategories(data);
+		} catch (e) {
+			console.error("Error cargando categorías:", e);
 		}
 	}
 
 	useEffect(() => {
+		fetchAccounts();
+		fetchCategories();
 		fetchTransactions();
-		setMounted(true);
 	}, [])
 
 	return (
-		<div className="w-full p-6">
+		<div className="w-full max-w p-6">
 			<div className="flex items-center justify-between mb-6">
 				<h1 className="text-xl font-semibold">Dashboard</h1>
 
-				<button onClick={() => Logout()} className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100 transition">
+				<button onClick={() => Logout()} className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100 transition cursor-pointer">
 					Logout
 				</button>
 			</div>
 
 			<div className="flex gap-4">
-				<button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded">
+				<button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
 					+ Nuevo Movimiento
 				</button>
 
 				<button
 					onClick={() => router.push("/categories")}
-					className="px-4 py-2 bg-blue-500 text-white rounded"
+					className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
 				>
 					Ver Categorías
 				</button>
 
 				<button
 					onClick={() => router.push("/accounts")}
-					className="px-4 py-2 bg-green-500 text-white rounded"
+					className="px-4 py-2 bg-green-500 text-white rounded cursor-pointer"
 				>
 					Ver Cuentas
 				</button>
@@ -129,36 +151,43 @@ export default function DashboardPage() {
 
 			<div className="mt-5">
 				{isLoaded &&
-					<table className="w-full border">
+					<table className="w-full border border-collapse table-fixed">
 						<thead>
 							<tr className="bg-gray-200">
-								<th className="p-2 border">Fecha</th>
-								<th className="p-2 border">Tipo</th>
-								<th className="p-2 border">Categoría</th>
-								<th className="p-2 border">Título</th>
-								<th className="p-2 border">Monto</th>
-								<th className="p-2 border">Descripción</th>
-								<th className="p-2 border">Cuenta</th>
-								<th className="p-2 border">Acciones</th>
+								<th className="p-2 border w-1/9">Fecha</th>
+								<th className="p-2 border w-1/9">Tipo</th>
+								<th className="p-2 border w-1/9">Categoría</th>
+								<th className="p-2 border w-1/9">Título</th>
+								<th className="p-2 border w-1/9">Monto</th>
+								<th className="p-2 border w-2/9">Descripción</th>
+								<th className="p-2 border w-1/9">Cuenta</th>
+								<th className="p-2 border w-1/9">Acciones</th>
 							</tr>
 						</thead>
 						<tbody>
 							{transactions.map((transaction: Transaction) => (
 								<tr key={transaction.id}>
-									<td className="p-2 border">{transaction.date.split("T")[0]}</td>
-									<td className="p-2 border">{TransactionTypeLabels[transaction.type]}</td>
-									<td className="p-2 border">{transaction.category ? transaction.category.name : "No especificada"}</td>
-									<td className="p-2 border">{transaction.title}</td>
-									<td className="p-2 border">{transaction.amount}</td>
-									<td className="p-2 border">{transaction.description ? transaction.description : "-"}</td>
-									<td className="p-2 border">{transaction.account ? transaction.account.name : "No especificada"}</td>
-									<td className="p-2 border flex gap-2">
-										<button onClick={() => handleEdit(transaction)} className="px-2 py-1 bg-yellow-400 rounded cursor-pointer">
-											Editar
-										</button>
-										<button onClick={() => confirmDelete(transaction)} className="px-2 py-1 bg-red-500 text-white rounded cursor-pointer">
-											Eliminar
-										</button>
+									<td className="p-2 border truncate">{transaction.date.split("T")[0]}</td>
+									<td className="p-2 border truncate">{TransactionTypeLabels[transaction.type]}</td>
+									<td className="p-2 border truncate">{transaction.category ? transaction.category.name : "No especificada"}</td>
+									<td className="p-2 border truncate">{transaction.title}</td>
+									<td className="p-2 border truncate">
+										<div className="flex place-content-between">
+											<p>S/.</p>
+											<p>{transaction.amount.toFixed(2)}</p>
+										</div>
+									</td>
+									<td className="p-2 border truncate" title={transaction.description?.toString()}>{transaction.description ? transaction.description : "-"}</td>
+									<td className="p-2 border truncate">{transaction.account ? transaction.account.name : "No especificada"}</td>
+									<td className="p-2 border truncate">
+										<div className="flex gap-2 place-content-end">
+											<button onClick={() => handleEdit(transaction)} className="w-20 px-2 py-1 bg-yellow-400 rounded cursor-pointer">
+												Editar
+											</button>
+											<button onClick={() => confirmDelete(transaction)} className="w-20 px-2 py-1 bg-red-500 text-white rounded cursor-pointer">
+												Eliminar
+											</button>
+										</div>
 									</td>
 								</tr>
 							))}

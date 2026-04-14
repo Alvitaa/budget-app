@@ -70,15 +70,15 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
                     </option>
                 ))}
             </select>
-            {categories.length <= 0 ?
+            {categories.filter((category) => category.type == form.type).length <= 0 ?
                 <select className="w-full border p-2 text-gray-400 bg-gray-200" disabled >
                     <option value="">No tienes categorías</option>
                 </select>
                 :
                 <select className="w-full border p-2" name="categoryId" value={form.categoryId} onChange={handleChange} >
                     <option value="">Escoge una categoría</option>
-                    {categories.map((category) => (
-                        <option key={category.id} value={category.id}>{category.id}</option>
+                    {categories.filter((category) => category.type == form.type).map((category) => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
                     ))}
                 </select>
             }
@@ -92,7 +92,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
                 <select className="w-full border p-2" name="accountId" value={form.accountId} onChange={handleChange} >
                     <option value="">Escoge una cuenta</option>
                     {accounts.map((account) => (
-                        <option key={account.id} value={account.id}>{account.id}</option>
+                        <option key={account.id} value={account.id}>{account.name}</option>
                     ))}
                 </select>
             }
