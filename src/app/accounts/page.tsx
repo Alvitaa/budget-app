@@ -1,21 +1,17 @@
 "use client";
+import AccountForm from "@/components/accounts/AccountForm";
+import Modal from "@/components/ui/modal/Modal";
 import { apiFetch } from "@/lib/api";
 import { Account } from "@/types/account";
 import { useEffect, useState } from "react";
 
 export default function AccountsPage() {
-	const [accounts, setAccounts] = useState([]);
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
 
-	const [form, setForm] = useState<{
-		name: string;
-		balance: number;
-	}>({
-		name: "",
-		balance: 0
-	});
-
-	const [editingId, setEditingId] = useState<string | null>(null);
+	const [accounts, setAccounts] = useState([]);
+	const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
 	async function fetchAccounts() {
 		try {
@@ -33,29 +29,36 @@ export default function AccountsPage() {
 		fetchAccounts();
 	}, []);
 
-	async function handleSubmit() {
-		if (!form.name.trim()) return;
+	async function handleCreate() {
+		setSelectedAccount(null);
+		setIsModalOpen(true);
+	}
 
-		try {
-			if (editingId) {
-				await apiFetch(`accounts/${editingId}`, {
-					method: "PATCH",
-					body: JSON.stringify(form),
-				});
-			} else {
-				await apiFetch("accounts", {
-					method: "POST",
-					body: JSON.stringify(form),
-				});
-			}
+	async function handleEdit(account: Account) {
+		setSelectedAccount(account)
+		setIsModalOpen(true);
+	}
 
-			setForm({ name: "", balance: 0 });
-			setEditingId(null);
+	function confirmDelete(account: Account) {
+		setSelectedAccount(account)
+		setIsDeleteModalOpen(true);
+	}
 
-			fetchAccounts()
-		} catch (e) {
-			console.error("Error guardando cuenta", e);
+	async function handleSubmit(data: any) {
+		if (selectedAccount) {
+			await apiFetch(`accounts/${selectedAccount.id}`, {
+				method: "PATCH",
+				body: JSON.stringify(data),
+			});
+		} else {
+			await apiFetch("accounts", {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
 		}
+
+		setIsModalOpen(false);
+		fetchAccounts()
 	}
 
 	async function handleDelete(id: string) {
@@ -64,71 +67,22 @@ export default function AccountsPage() {
 				method: "DELETE",
 			});
 
+			setIsDeleteModalOpen(false);
 			fetchAccounts();
 		} catch (e) {
 			console.error("Error eliminando cuenta.", e)
 		}
 	}
 
-	async function handleEdit(account: Account) {
-		setForm({
-			name: account.name,
-			balance: account.balance,
-		});
-		setEditingId(account.id);
-	}
-
 	return (
 		<div className="p-6">
 			<h1 className="text-xl font-bold mb-4">Cuentas</h1>
 
-			<button className="mb-4 px-4 py-2 bg-green-500 text-white rounded">
+			<button onClick={handleCreate} className="mb-4 px-4 py-2 bg-green-500 text-white rounded">
 				+ Nueva Cuenta
 			</button>
 
-			<div className="mb-6 flex gap-2">
-				<input
-					type="text"
-					placeholder="Nombre"
-					value={form.name}
-					onChange={(e) =>
-						setForm({ ...form, name: e.target.value })
-					}
-					className="border p-2"
-				/>
-
-				<input
-					type="number"
-					placeholder="Balance"
-					value={form.balance}
-					onChange={(e) =>
-						setForm({ ...form, balance: Number(e.target.value) })
-					}
-					className="border p-2"
-				/>
-
-				<button
-					onClick={handleSubmit}
-					className="bg-blue-500 text-white px-4 py-2 rounded"
-				>
-					{editingId ? "Actualizar" : "Crear"}
-				</button>
-
-				{editingId && (
-					<button
-						onClick={() => {
-							setEditingId(null);
-							setForm({ name: "", balance: 0 });
-						}}
-						className="bg-gray-400 text-white px-4 py-2 rounded"
-					>
-						Cancelar
-					</button>
-				)}
-			</div>
-
 			{isLoaded ?
-
 				<table className="w-full border">
 					<thead>
 						<tr className="bg-gray-200">
@@ -147,7 +101,7 @@ export default function AccountsPage() {
 									<button onClick={() => handleEdit(account)} className="px-2 py-1 bg-yellow-400 rounded">
 										Editar
 									</button>
-									<button onClick={() => handleDelete(account.id)} className="px-2 py-1 bg-red-500 text-white rounded">
+									<button onClick={() => confirmDelete(account)} className="px-2 py-1 bg-red-500 text-white rounded">
 										Eliminar
 									</button>
 								</td>
@@ -157,6 +111,30 @@ export default function AccountsPage() {
 				</table>
 				:
 				<h2>You have no accounts registered. Create one!</h2>}
+
+			<Modal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				title={selectedAccount ? "Editar" : "Crear"}
+			>
+				<AccountForm initialData={selectedAccount} onSubmit={handleSubmit} />
+			</Modal>
+
+			<Modal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				title="¿Estás seguro?"
+			>
+				<p>Esta acción es irreversible.</p>
+				<div className="flex place-content-around gap-5 mt-5">
+					<button onClick={() => handleDelete(selectedAccount!.id)} className="px-2 py-2 w-full bg-red-500 rounded text-white font-bold cursor-pointer">
+						Sí, borrar
+					</button>
+					<button onClick={() => setIsDeleteModalOpen(false)} className="px-2 py-2 w-full bg-gray-200 rounded cursor-pointer">
+						No, cancelar
+					</button>
+				</div>
+			</Modal>
 		</div>
 	)
 }
