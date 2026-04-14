@@ -1,21 +1,18 @@
 "use client";
 import { apiFetch } from "@/lib/api";
-import { TransactionType, TransactionTypeLabels } from "@/constants/TransactionType";
+import { TransactionTypeLabels } from "@/constants/TransactionType";
 import { useEffect, useState } from "react";
 import { Category } from "@/types/category";
+import Modal from "@/components/ui/modal/Modal";
+import CategoryForm from "@/components/categories/CategoryForm";
 
 export default function CategoriesPage() {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+	const [isLoaded, setIsLoaded] = useState(false);
+
 	const [categories, setCategories] = useState([]);
-
-	const [form, setForm] = useState<{
-		name: string;
-		type: TransactionType;
-	}>({
-		name: "",
-		type: "INCOME",
-	});
-
-	const [editingId, setEditingId] = useState<string | null>(null);
+	const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
 	async function fetchCategories() {
 		try {
@@ -32,29 +29,37 @@ export default function CategoriesPage() {
 		fetchCategories();
 	}, []);
 
-	async function handleSubmit() {
-		if (!form.name.trim()) return;
+	function handleCreate() {
+		setSelectedCategory(null);
+		setIsModalOpen(true);
+	}
 
-		try {
-			if (editingId) {
-				await apiFetch(`categories/${editingId}`, {
-					method: "PATCH",
-					body: JSON.stringify(form),
-				});
-			} else {
-				await apiFetch("categories", {
-					method: "POST",
-					body: JSON.stringify(form),
-				});
-			}
+	function handleEdit(category: Category) {
+		setSelectedCategory(category);
+		setIsModalOpen(true);
+	}
 
-			setForm({ name: "", type: "INCOME" });
-			setEditingId(null);
+	async function handleSubmit(data: any) {
 
-			fetchCategories()
-		} catch (e) {
-			console.error("Error guardando categoría", e);
+		if (selectedCategory) {
+			await apiFetch(`categories/${selectedCategory.id}`, {
+				method: "PATCH",
+				body: JSON.stringify(data),
+			});
+		} else {
+			await apiFetch("categories", {
+				method: "POST",
+				body: JSON.stringify(data),
+			});
 		}
+
+		setIsModalOpen(false);
+		fetchCategories()
+	}
+
+	function confirmDelete(category: Category) {
+		setSelectedCategory(category);
+		setIsDeleteModalOpen(true);
 	}
 
 	async function handleDelete(id: string) {
@@ -63,73 +68,20 @@ export default function CategoriesPage() {
 				method: "DELETE",
 			});
 
+			setIsDeleteModalOpen(false);
 			fetchCategories();
 		} catch (e) {
 			console.error("Error eliminando categoría", e);
 		}
 	}
 
-	async function handleEdit(category: Category) {
-		setForm({
-			name: category.name,
-			type: category.type
-		});
-		setEditingId(category.id)
-	}
-
 	return (
 		<div className="p-6">
 			<h1 className="text-xl font-bold mb-4">Categorías</h1>
 
-			<button className="mb-4 px-4 py-2 bg-blue-500 text-white rounded">
+			<button onClick={handleCreate} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded">
 				+ Nueva Categoría
 			</button>
-
-			<div className="mb-6 flex gap-2">
-				<input
-					type="text"
-					placeholder="Nombre"
-					value={form.name}
-					onChange={(e) =>
-						setForm({ ...form, name: e.target.value })
-					}
-					className="border p-2"
-				/>
-
-				<select
-					value={form.type}
-					onChange={(e) =>
-						setForm({
-							...form,
-							type: e.target.value as TransactionType,
-						})
-					}
-					className="border p-2"
-				>
-					<option value="INCOME">INGRESO</option>
-					<option value="EXPENSE">GASTO</option>
-					<option value="SAVING">AHORRO</option>
-				</select>
-
-				<button
-					onClick={handleSubmit}
-					className="bg-blue-500 text-white px-4 py-2 rounded"
-				>
-					{editingId ? "Actualizar" : "Crear"}
-				</button>
-
-				{editingId && (
-					<button
-						onClick={() => {
-							setEditingId(null);
-							setForm({ name: "", type: "INCOME" });
-						}}
-						className="bg-gray-400 text-white px-4 py-2 rounded"
-					>
-						Cancelar
-					</button>
-				)}
-			</div>
 
 			<table className="w-full border">
 				<thead>
@@ -149,7 +101,7 @@ export default function CategoriesPage() {
 								<button onClick={() => handleEdit(category)} className="px-2 py-1 bg-yellow-400 rounded">
 									Editar
 								</button>
-								<button onClick={() => handleDelete(category.id)} className="px-2 py-1 bg-red-500 text-white rounded">
+								<button onClick={() => confirmDelete(category)} className="px-2 py-1 bg-red-500 text-white rounded">
 									Eliminar
 								</button>
 							</td>
@@ -157,6 +109,31 @@ export default function CategoriesPage() {
 					))}
 				</tbody>
 			</table>
+
+			<Modal
+				isOpen={isModalOpen}
+				onClose={() => setIsModalOpen(false)}
+				title={selectedCategory ? "Editar" : "Crear"}
+			>
+				<CategoryForm initialData={selectedCategory} onSubmit={handleSubmit} />
+			</Modal>
+
+			<Modal
+				isOpen={isDeleteModalOpen}
+				onClose={() => setIsDeleteModalOpen(false)}
+				title="¿Estás seguro?"
+			>
+				<p>Esta acción es irreversible.</p>
+				<div className="flex place-content-around gap-5 mt-5">
+					<button onClick={() => handleDelete(selectedCategory!.id)} className="px-2 py-2 w-full bg-red-500 rounded text-white font-bold cursor-pointer">
+						Sí, borrar
+					</button>
+					<button onClick={() => setIsDeleteModalOpen(false)} className="px-2 py-2 w-full bg-gray-200 rounded cursor-pointer">
+						No, cancelar
+					</button>
+				</div>
+
+			</Modal>
 		</div>
 	);
 }

@@ -45,8 +45,6 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
                 accountId: initialData.account?.id ?? ""
             })
         }
-        console.log(categories);
-        console.log(accounts);
     }, [initialData]);
 
     function handleChange(
