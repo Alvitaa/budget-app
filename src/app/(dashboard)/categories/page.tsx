@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Category } from "@/types/category";
 import Modal from "@/components/ui/modal/Modal";
 import CategoryForm from "@/components/categories/CategoryForm";
+import PageHeader from "@/components/ui/PageHeader";
 
 export default function CategoriesPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,8 +77,8 @@ export default function CategoriesPage() {
 	}
 
 	return (
-		<div className="p-6">
-			<h1 className="text-xl font-bold mb-4">Categorías</h1>
+		<>
+			<PageHeader title="Categorías" />
 
 			<button onClick={handleCreate} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded">
 				+ Nueva Categoría
@@ -134,6 +135,6 @@ export default function CategoriesPage() {
 				</div>
 
 			</Modal>
-		</div>
+		</>
 	);
 }

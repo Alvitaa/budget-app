@@ -58,10 +58,20 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
         }));
     }
 
+    function handleTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
+        const { name, value } = e.target;
+
+        setForm((prev) => ({
+            ...prev,
+            [name]: value,
+            categoryId: ""
+        }));
+    }
+
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="flex flex-col gap-5">
             <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Detalle" className="w-full border p-2" />
-            <select className="w-full border p-2" name="type" value={form.type} onChange={handleChange}>
+            <select className="w-full border p-2" name="type" value={form.type} onChange={handleTypeChange}>
                 {Object.entries(TransactionTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>
                         {label}
