@@ -9,12 +9,15 @@ import { removeToken } from "@/lib/auth";
 import { Transaction } from "@/types/transaction";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { FaCircle } from "react-icons/fa6";
 
 export default function DashboardPage() {
 	const router = useRouter();
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
+	const [transactionPage, setTransactionPage] = useState(0);
+	const [transactionsPerPage, setTransactionPerPage] = useState(20);
 
 	const [transactions, setTransactions] = useState([]);
 	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -62,7 +65,6 @@ export default function DashboardPage() {
 				method: "PATCH",
 				body: JSON.stringify({
 					...data,
-					date: new Date(data.date).toISOString()
 				}),
 			});
 		} else {
@@ -82,7 +84,7 @@ export default function DashboardPage() {
 		const year = date.getFullYear();
 
 		try {
-			const data = await apiFetch("transactions", {
+			const data = await apiFetch(`transactions?skip=${transactionPage}&take=${transactionsPerPage}`, {
 				method: "GET",
 			})
 			setTransactions(data);
@@ -115,10 +117,150 @@ export default function DashboardPage() {
 	}
 
 	useEffect(() => {
-		fetchAccounts();
-		fetchCategories();
-		fetchTransactions();
+		//fetchAccounts();
+		//fetchCategories();
+		//fetchTransactions();
 	}, [])
+
+	return (
+		<>
+			<div className="w-full h-full flex flex-col gap-5">
+				<div className="w-full flex flex-row gap-5">
+					<div className="w-full h-full card">
+						<h2 className="font-bold text-xl text-gray-950 flex justify-between items-center">
+							Balance
+							<p className="text-base text-neutral-400 font-semibold">BCP</p>
+						</h2>
+						<div className="flex justify-between text-2xl font-bold">
+							<p>S/.</p>
+							<p>1234.98</p>
+						</div>
+					</div>
+					<div className="w-full h-full card">
+						<h2 className="font-bold text-xl text-gray-950">Ingresos</h2>
+						<div className="flex justify-between text-2xl font-bold text-green-500">
+							<p>S/.</p>
+							<p>1234.98</p>
+						</div>
+					</div>
+					<div className="w-full h-full card">
+						<h2 className="font-bold text-xl text-gray-950">Gastos</h2>
+						<div className="flex justify-between text-2xl font-bold text-red-500">
+							<p>S/.</p>
+							<p>1234.98</p>
+						</div>
+					</div>
+					<div className="w-full h-full card">
+						<h2 className="font-bold text-xl text-gray-950">
+							Ahorros
+						</h2>
+						<div className="flex justify-between text-2xl font-bold">
+							<p>S/.</p>
+							<p>1234.98</p>
+						</div>
+					</div>
+				</div>
+				<div className="flex-1 flex flex-row gap-5 min-h-0">
+					<div className="w-6/25 flex flex-col gap-5"> {/* //TODO: GET BETTER WIDTH VALUE */}
+						<div className="w-full h-fit card">
+							<h2 className="text-center font-semibold">Distribución de gastos</h2>
+							<img className="h-52 w-auto mx-auto" src={"https://images.edrawsoft.com/articles/donut-chart/donut-chart-1.png"} />
+							<div className="w-full">
+								<h3 className="mb-2">Categorías</h3>
+								<div className="flex w-full items-center gap-2 justify-between">
+									<div className="flex items-center gap-2">
+										<div className="text-rose-500">
+											<FaCircle />
+										</div>
+										<p>Comida</p>
+									</div>
+									<p className="flex">33.3%</p>
+								</div>
+								<div className="flex w-full items-center gap-2 justify-between">
+									<div className="flex items-center gap-2">
+										<div className="text-orange-300">
+											<FaCircle />
+										</div>
+										<p>Transporte</p>
+									</div>
+									<p className="flex">25.0%</p>
+								</div>
+								<div className="flex w-full items-center gap-2 justify-between">
+									<div className="flex items-center gap-2">
+										<div className="text-cyan-600">
+											<FaCircle />
+										</div>
+										<p>Ropa</p>
+									</div>
+									<p className="flex">25.0%</p>
+								</div>
+								<div className="flex w-full items-center gap-2 justify-between">
+									<div className="flex items-center gap-2">
+										<div className="text-emerald-200">
+											<FaCircle />
+										</div>
+										<p>Comida</p>
+									</div>
+									<p className="flex">16.6%</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div className="w-full flex-1 card">
+						<div className="border border-neutral-300 rounded-2xl overflow-hidden">
+							<table className="w-full border-collapse table-fixed">
+								<thead className="[&>tr>th:first-child]:pl-4 [&>tr>th:last-child]:pr-4">
+									<tr className="border-b bg-neutral-100">
+										<th className="p-2 w-1/9">Fecha</th>
+										<th className="p-2 w-1/9">Tipo</th>
+										<th className="p-2 w-1/9">Categoría</th>
+										<th className="p-2 w-1/9">Título</th>
+										<th className="p-2 w-1/9">Monto</th>
+										<th className="p-2 w-2/9">Descripción</th>
+										<th className="p-2 w-1/9">Cuenta</th>
+										<th className="p-2 w-1/9">Acciones</th>
+									</tr>
+								</thead>
+								<tbody className="[&>tr]:border-b [&>tr]:text-center [&>tr:last-child]:border-b-0 [&>tr>td:first-child]:pl-4 [&>tr>td:last-child]:pr-4">
+									<tr>
+										<td>24/04/2026</td>
+										<td>Gasto</td>
+										<td>Comida</td>
+										<td>Tanta</td>
+										<td>S/. 129.80</td>
+										<td>Comida</td>
+										<td>BBVA</td>
+										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
+									</tr>
+									<tr>
+										<td>24/04/2026</td>
+										<td>Gasto</td>
+										<td>Comida</td>
+										<td>Tanta</td>
+										<td>S/. 129.80</td>
+										<td>Comida</td>
+										<td>BBVA</td>
+										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
+									</tr>
+									<tr>
+										<td>24/04/2026</td>
+										<td>Gasto</td>
+										<td>Comida</td>
+										<td>Tanta</td>
+										<td>S/. 129.80</td>
+										<td>Comida</td>
+										<td>BBVA</td>
+										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<p className="mt-20 text-blue-500 text-center underline">Ver todos los movimientos</p>
+					</div>
+				</div>
+			</div>
+		</>
+	)
 
 	return (
 		<>

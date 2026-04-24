@@ -1,7 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+    --color-main: #21839e;
+    --shadow-s:
+        inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
+    --shadow-m:
+        inset 0 1px 2px #ffffff50, 0 2px 4px #00000030, 0 4px 8px #00000015;
+    --shadow-l:
+        inset 0 1px 2px #ffffff70, 0 4px 6px #00000030, 0 6px 12px #00000015;
+}
+
 body {
-  font-family: sans-serif;
-  background-color: #ffffff;
-  color: #000000;
+    font-family: sans-serif;
+    color: #000000;
+}
+
+.card {
+	background-color: var(--color-white);
+	border-radius: var(--radius-xl);
+	padding: calc(var(--spacing) * 5);
+	display: flex;
+	flex-direction: column;
+	gap: calc(var(--spacing) * 5);
+	box-shadow: var(--shadow-m);
 }

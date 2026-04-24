@@ -28,7 +28,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
         amount: 0,
         description: "",
         type: "EXPENSE",
-        date: new Date().toISOString().split("T")[0],
+        date: new Date().toISOString(),
         categoryId: "",
         accountId: ""
     })
@@ -40,7 +40,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
                 amount: initialData.amount,
                 description: initialData.description ?? "",
                 type: initialData.type,
-                date: new Date(initialData.date).toISOString().split("T")[0],
+                date: new Date(initialData.date).toISOString(),
                 categoryId: initialData.category?.id ?? "",
                 accountId: initialData.account?.id ?? ""
             })
