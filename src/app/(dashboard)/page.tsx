@@ -1,15 +1,66 @@
 "use client";
 
 import TransactionForm from "@/components/transactions/TransactionForm";
+import AmountCard from "@/components/ui/cards/AmountCard";
+import BalanceCard from "@/components/ui/cards/BalanceCard";
+import Card from "@/components/ui/cards/Card";
 import Modal from "@/components/ui/modal/Modal";
 import PageHeader from "@/components/ui/PageHeader";
+import Table, { Column } from "@/components/ui/table/Table";
 import { TransactionTypeLabels } from "@/constants/TransactionType";
 import { apiFetch } from "@/lib/api";
 import { removeToken } from "@/lib/auth";
+import { Account } from "@/types/account";
+import { Category } from "@/types/category";
 import { Transaction } from "@/types/transaction";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FaCircle } from "react-icons/fa6";
+
+const columns: Column<Transaction>[] = [
+	{
+		header: "Fecha",
+		render: (t) => t.date.split("T")[0]
+	},
+	{
+		header: "Tipo",
+		render: (t) => TransactionTypeLabels[t.type]
+	},
+	{
+		header: "Categoría",
+		render: (t) => t.category?.name ?? "No especificada"
+	},
+	{
+		header: "Título",
+		render: (t) => t.title
+	},
+	{
+		header: "Monto",
+		render: (t) => (
+			<div className="flex place-content-between">
+				<p>S/.</p>
+				<p>{t.amount.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
+			</div>
+		)
+	},
+	{
+		header: "Description",
+		className: "w-2/9!",
+		render: (t) => t.description ? t.description : "-"
+	},
+	{
+		header: "Cuenta",
+		render: (t) => t.account?.name ?? "No especificada"
+	},
+	{
+		header: "Acciones",
+		render: (t) => (
+			<div className="flex place-content-between">
+				<p>Edit</p><p> Delete</p>
+			</div>
+		)
+	},
+]
 
 export default function DashboardPage() {
 	const router = useRouter();
@@ -19,10 +70,26 @@ export default function DashboardPage() {
 	const [transactionPage, setTransactionPage] = useState(0);
 	const [transactionsPerPage, setTransactionPerPage] = useState(20);
 
-	const [transactions, setTransactions] = useState([]);
+	const [transactions, setTransactions] = useState<Transaction[]>([]);
 	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-	const [categories, setCategories] = useState([]);
-	const [accounts, setAccounts] = useState([]);
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [accounts, setAccounts] = useState<Account[]>([
+		{
+			id: "1",
+			name: "BCP",
+			balance: 1234.98
+		},
+		{
+			id: "2",
+			name: "BBVA",
+			balance: 5678.12
+		},
+		{
+			id: "3",
+			name: "Interbanksazozozozozozooz",
+			balance: 9876.54
+		}
+	]);
 	const [date, setDate] = useState(new Date());
 
 	function Logout() {
@@ -117,51 +184,31 @@ export default function DashboardPage() {
 	}
 
 	useEffect(() => {
-		//fetchAccounts();
-		//fetchCategories();
-		//fetchTransactions();
+		fetchAccounts();
+		fetchCategories();
+		fetchTransactions();
 	}, [])
 
 	return (
 		<>
-			<div className="w-full h-full flex flex-col gap-5">
-				<div className="w-full flex flex-row gap-5">
-					<div className="w-full h-full card">
-						<h2 className="font-bold text-xl text-gray-950 flex justify-between items-center">
-							Balance
-							<p className="text-base text-neutral-400 font-semibold">BCP</p>
-						</h2>
-						<div className="flex justify-between text-2xl font-bold">
-							<p>S/.</p>
-							<p>1234.98</p>
-						</div>
-					</div>
-					<div className="w-full h-full card">
-						<h2 className="font-bold text-xl text-gray-950">Ingresos</h2>
-						<div className="flex justify-between text-2xl font-bold text-green-500">
-							<p>S/.</p>
-							<p>1234.98</p>
-						</div>
-					</div>
-					<div className="w-full h-full card">
-						<h2 className="font-bold text-xl text-gray-950">Gastos</h2>
-						<div className="flex justify-between text-2xl font-bold text-red-500">
-							<p>S/.</p>
-							<p>1234.98</p>
-						</div>
-					</div>
-					<div className="w-full h-full card">
-						<h2 className="font-bold text-xl text-gray-950">
-							Ahorros
-						</h2>
-						<div className="flex justify-between text-2xl font-bold">
-							<p>S/.</p>
-							<p>1234.98</p>
-						</div>
-					</div>
+			<div className="grid grid-cols-4 gap-5 grid-rows-[auto_1fr] h-full">
+				{/* Top row */}
+				<div className="col-span-1">
+					<BalanceCard title="Balance" banks={accounts} currency="S/." />
 				</div>
-				<div className="flex-1 flex flex-row gap-5 min-h-0">
-					<div className="w-6/25 flex flex-col gap-5"> {/* //TODO: GET BETTER WIDTH VALUE */}
+				<div className="col-span-1">
+					<AmountCard title="Ingresos" currency="S/." amount={1234.98} amountColor="text-green-500" />
+				</div>
+				<div className="col-span-1">
+					<AmountCard title="Gastos" currency="S/." amount={1234.98} amountColor="text-red-500" />
+				</div>
+				<div className="col-span-1">
+					<AmountCard title="Ahorros" currency="S/." amount={1234.98} />
+				</div>
+
+				{/* Second row */}
+				<div className="col-span-1">
+					<div className="w-full flex flex-col gap-5"> {/* //TODO: GET BETTER WIDTH VALUE */}
 						<div className="w-full h-fit card">
 							<h2 className="text-center font-semibold">Distribución de gastos</h2>
 							<img className="h-52 w-auto mx-auto" src={"https://images.edrawsoft.com/articles/donut-chart/donut-chart-1.png"} />
@@ -206,57 +253,9 @@ export default function DashboardPage() {
 							</div>
 						</div>
 					</div>
-					<div className="w-full flex-1 card">
-						<div className="border border-neutral-300 rounded-2xl overflow-hidden">
-							<table className="w-full border-collapse table-fixed">
-								<thead className="[&>tr>th:first-child]:pl-4 [&>tr>th:last-child]:pr-4">
-									<tr className="border-b bg-neutral-100">
-										<th className="p-2 w-1/9">Fecha</th>
-										<th className="p-2 w-1/9">Tipo</th>
-										<th className="p-2 w-1/9">Categoría</th>
-										<th className="p-2 w-1/9">Título</th>
-										<th className="p-2 w-1/9">Monto</th>
-										<th className="p-2 w-2/9">Descripción</th>
-										<th className="p-2 w-1/9">Cuenta</th>
-										<th className="p-2 w-1/9">Acciones</th>
-									</tr>
-								</thead>
-								<tbody className="[&>tr]:border-b [&>tr]:text-center [&>tr:last-child]:border-b-0 [&>tr>td:first-child]:pl-4 [&>tr>td:last-child]:pr-4">
-									<tr>
-										<td>24/04/2026</td>
-										<td>Gasto</td>
-										<td>Comida</td>
-										<td>Tanta</td>
-										<td>S/. 129.80</td>
-										<td>Comida</td>
-										<td>BBVA</td>
-										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
-									</tr>
-									<tr>
-										<td>24/04/2026</td>
-										<td>Gasto</td>
-										<td>Comida</td>
-										<td>Tanta</td>
-										<td>S/. 129.80</td>
-										<td>Comida</td>
-										<td>BBVA</td>
-										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
-									</tr>
-									<tr>
-										<td>24/04/2026</td>
-										<td>Gasto</td>
-										<td>Comida</td>
-										<td>Tanta</td>
-										<td>S/. 129.80</td>
-										<td>Comida</td>
-										<td>BBVA</td>
-										<td className="flex justify-between"><p>Edit</p><p> Delete</p></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<p className="mt-20 text-blue-500 text-center underline">Ver todos los movimientos</p>
-					</div>
+				</div>
+				<div className="col-span-3 h-full">
+					<Table className="bg-white card-border overflow-hidden rounded-xl w-full h-full" columnClassName="w-1/9" columns={columns} rows={transactions} />
 				</div>
 			</div>
 		</>
