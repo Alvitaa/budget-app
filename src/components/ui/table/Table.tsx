@@ -24,7 +24,7 @@ export default function Table<T>({ columns, rows, className, columnClassName }: 
                         ))}
                     </tr>
                 </thead>
-                <tbody className="bg-white [&>tr]:border-b [&>tr]:text-center [&>tr:last-child]:border-b-0 [&>tr>td:first-child]:pl-4 [&>tr>td:last-child]:pr-4">
+                <tbody className="bg-white [&>tr]:border-b [&>tr:last-child]:border-b-0 [&>tr>td:first-child]:pl-4 [&>tr>td:last-child]:pr-4">
                     {rows.map((row, index) => (
                         <tr key={index}>
                             {columns.map((column, j) => (

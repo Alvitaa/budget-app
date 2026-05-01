@@ -26,6 +26,7 @@
 
 body {
     color: #000000;
+    overflow-x: hidden;
 }
 
 .card {

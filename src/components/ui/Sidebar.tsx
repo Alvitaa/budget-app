@@ -5,11 +5,12 @@ import { ReactNode } from "react";
 import { IoCardOutline, IoCardSharp, IoCashOutline, IoCashSharp, IoHomeOutline, IoHomeSharp, IoMenuSharp, IoPricetagsOutline, IoPricetagsSharp, IoReceiptOutline, IoReceiptSharp, IoStatsChartOutline, IoStatsChartSharp } from "react-icons/io5";
 
 type SidebarProps = {
+    className?: string;
     isOpen: boolean;
     setIsOpen(data: any): void;
 }
 
-export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({ isOpen, setIsOpen, className }: SidebarProps) {
     const router = useRouter();
     const pathname = usePathname();
     const routes: { icon: ReactNode, iconFill: ReactNode, label: string, href: string }[] = [
@@ -28,7 +29,7 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
 
     const animation = "transition-all duration-400 ease-in-out";
     return (
-        <aside className={`rounded-r-2xl flex flex-col gap-10 overflow-hidden max-w-1/6 shadow-inset-m ${animation} ${isOpen ? "w-56" : "w-16"}`}>
+        <aside className={`rounded-r-2xl flex flex-col gap-10 overflow-hidden max-w-1/6 shadow-inset-m ${animation} ${className} ${isOpen ? "w-56" : "w-16"}`}>
             <button
                 className="text-2xl p-5 cursor-pointer w-16"
                 onClick={() => { setIsOpen(!isOpen) }}
