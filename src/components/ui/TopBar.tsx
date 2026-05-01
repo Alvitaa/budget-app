@@ -19,12 +19,12 @@ export default function TopBar () {
     const title = getTitle(pathname);
 
     return (
-        <nav className="w-full py-2 px-5 flex flex-row border-b items-center bg-white">
-            <div className="w-1/4 text-lg">Placeholder</div>
-            <div className="w-1/2 text-center text-2xl font-bold">
+        <nav className="w-full py-2 px-5 flex flex-row border-b items-center justify-between bg-white">
+            <h3 className="text-xl">Placeholder</h3>
+            {/* <div className="w-1/2 text-center text-2xl font-bold">
                 <h1>{title}</h1>
-            </div>
-            <div className="w-1/4 text-base flex justify-end gap-5">
+            </div> */}
+            <div className="text-xl flex justify-end gap-5">
                 <IoMdSettings />
                 <IoMdNotifications />
                 <FaUser />

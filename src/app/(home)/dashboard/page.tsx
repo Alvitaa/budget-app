@@ -1,5 +1,7 @@
 "use client";
 
+import DashboardTitle from "@/components/dashboard/DashboardTitle";
+import Button from "@/components/inputs/Button";
 import TransactionForm from "@/components/transactions/TransactionForm";
 import AmountCard from "@/components/ui/cards/AmountCard";
 import BalanceCard from "@/components/ui/cards/BalanceCard";
@@ -12,6 +14,7 @@ import { apiFetch } from "@/lib/api";
 import { removeToken } from "@/lib/auth";
 import { Account } from "@/types/account";
 import { Category } from "@/types/category";
+import DateFilter from "@/types/componentTypes/DateFilter";
 import { Transaction } from "@/types/transaction";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -39,7 +42,7 @@ const columns: Column<Transaction>[] = [
 		render: (t) => (
 			<div className="flex place-content-between">
 				<p>S/.</p>
-				<p>{t.amount.toLocaleString(undefined, {maximumFractionDigits: 2})}</p>
+				<p>{t.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
 			</div>
 		)
 	},
@@ -73,24 +76,28 @@ export default function DashboardPage() {
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
 	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 	const [categories, setCategories] = useState<Category[]>([]);
-	const [accounts, setAccounts] = useState<Account[]>([
-		{
-			id: "1",
-			name: "BCP",
-			balance: 1234.98
-		},
-		{
-			id: "2",
-			name: "BBVA",
-			balance: 5678.12
-		},
-		{
-			id: "3",
-			name: "Interbanksazozozozozozooz",
-			balance: 9876.54
+	const [accounts, setAccounts] = useState<Account[]>([]);
+	const [filter, setFilter] = useState<DateFilter>(() => {
+		const date = new Date;
+		return {
+			type: "month",
+			month: date.getMonth(),
+			year: date.getFullYear()
 		}
-	]);
-	const [date, setDate] = useState(new Date());
+	});
+
+	function buildQuery(filter: DateFilter) {
+		switch (filter.type) {
+			case "month":
+				return `?from=${filter.year}-${filter.month}-01&to=${filter.year}-${filter.month}-31`;
+
+			case "year":
+				return `?from=${filter.year}-01-01&to=${filter.year}-12-31`;
+
+			case "range":
+				return `?from=${filter.from.year}-${filter.from.month}-01&to=${filter.to.year}-${filter.to.month}-31`;
+		}
+	}
 
 	function Logout() {
 		removeToken();
@@ -147,9 +154,6 @@ export default function DashboardPage() {
 	}
 
 	async function fetchTransactions() {
-		const month = date.getMonth();
-		const year = date.getFullYear();
-
 		try {
 			const data = await apiFetch(`transactions?skip=${transactionPage}&take=${transactionsPerPage}`, {
 				method: "GET",
@@ -191,13 +195,14 @@ export default function DashboardPage() {
 
 	return (
 		<>
-			<div className="grid grid-cols-4 gap-5 grid-rows-[auto_1fr] h-full">
+			<DashboardTitle />
+			<div className="grid grid-cols-4 gap-5 grid-rows-[auto_1fr] flex-1">
 				{/* Top row */}
 				<div className="col-span-1">
 					<BalanceCard title="Balance" banks={accounts} currency="S/." />
 				</div>
 				<div className="col-span-1">
-					<AmountCard title="Ingresos" currency="S/." amount={1234.98} amountColor="text-green-500" />
+					<AmountCard title="Ingresos" currency="S/." amount={1234.98} amountColor="text-lime-600" />
 				</div>
 				<div className="col-span-1">
 					<AmountCard title="Gastos" currency="S/." amount={1234.98} amountColor="text-red-500" />
@@ -255,7 +260,7 @@ export default function DashboardPage() {
 					</div>
 				</div>
 				<div className="col-span-3 h-full">
-					<Table className="bg-white card-border overflow-hidden rounded-xl w-full h-full" columnClassName="w-1/9" columns={columns} rows={transactions} />
+					<Table className="bg-white flex-1 card-border overflow-hidden rounded-xl w-full h-full" columnClassName="w-1/9" columns={columns} rows={transactions} />
 				</div>
 			</div>
 		</>
