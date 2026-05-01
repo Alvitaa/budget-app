@@ -2,9 +2,11 @@
 import AccountForm from "@/components/accounts/AccountForm";
 import Modal from "@/components/ui/modal/Modal";
 import PageHeader from "@/components/ui/PageHeader";
+import Table, { Column } from "@/components/ui/table/Table";
 import { apiFetch } from "@/lib/api";
 import { Account } from "@/types/account";
 import { useEffect, useState } from "react";
+import { IoAddCircle } from "react-icons/io5";
 
 export default function AccountsPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,6 +15,38 @@ export default function AccountsPage() {
 
 	const [accounts, setAccounts] = useState([]);
 	const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+
+	const columns: Column<Account>[] = [
+		{
+			header: "Balance",
+			className: "w-1/6",
+			render: (a) => (
+				<div className="flex place-content-between">
+					<p>S/.</p>
+					<p>{a.balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+				</div>
+			)
+		},
+		{
+			header: "Nombre",
+			className: "w-4/6",
+			render: (a) => a.name
+		},
+		{
+			header: "Acciones",
+			className: "w-1/6 text-center!",
+			render: (a) => (
+				<div className="flex justify-between">
+					<button onClick={() => handleEdit(a)} className="px-2 py-1 w-20 bg-yellow-400 rounded">
+						Editar
+					</button>
+					<button onClick={() => confirmDelete(a)} className="px-2 py-1 w-20 bg-red-500 text-white rounded">
+						Eliminar
+					</button>
+				</div>
+			)
+		},
+	];
 
 	async function fetchAccounts() {
 		try {
@@ -77,41 +111,19 @@ export default function AccountsPage() {
 
 	return (
 		<>
-			<PageHeader title="Cuentas" />
+			<h1>Cuentas</h1>
 
-			<button onClick={handleCreate} className="mb-4 px-4 py-2 bg-green-500 text-white rounded">
-				+ Nueva Cuenta
+			<button onClick={handleCreate} className="px-4 py-2 bg-main font-medium text-white rounded-2xl shadow-m flex justify-center items-center">
+				<span className="mr-2 text-2xl">
+					<IoAddCircle/>
+				</span>
+				Nueva Cuenta
 			</button>
 
 			{isLoaded ?
-				<table className="w-full border">
-					<thead>
-						<tr className="bg-gray-200">
-							<th className="p-2 border">Nombre</th>
-							<th className="p-2 border">Balance</th>
-							<th className="p-2 border">Acciones</th>
-						</tr>
-					</thead>
-
-					<tbody>
-						{accounts.map((account: any) => (
-							<tr key={account.id}>
-								<td className="p-2 border">{account.name}</td>
-								<td className="p-2 border">S/ {account.balance}</td>
-								<td className="p-2 border flex gap-2">
-									<button onClick={() => handleEdit(account)} className="px-2 py-1 bg-yellow-400 rounded">
-										Editar
-									</button>
-									<button onClick={() => confirmDelete(account)} className="px-2 py-1 bg-red-500 text-white rounded">
-										Eliminar
-									</button>
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
+				<Table className="card-border rounded-xl overflow-hidden" columnClassName="text-left" columns={columns} rows={accounts} />
 				:
-				<h2>You have no accounts registered. Create one!</h2>}
+				<h2>You have no accounts created. Add one!</h2>}
 
 			<Modal
 				isOpen={isModalOpen}

@@ -42,7 +42,7 @@ const columns: Column<Transaction>[] = [
 		render: (t) => (
 			<div className="flex place-content-between">
 				<p>S/.</p>
-				<p>{t.amount.toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+				<p>{t.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
 			</div>
 		)
 	},
@@ -260,7 +260,7 @@ export default function DashboardPage() {
 					</div>
 				</div>
 				<div className="col-span-3 h-full">
-					<Table className="bg-white flex-1 card-border overflow-hidden rounded-xl w-full h-full" columnClassName="w-1/9" columns={columns} rows={transactions} />
+					<Table className="bg-white flex-1 card-border overflow-hidden rounded-xl w-full h-full text-left" columnClassName="w-1/9" columns={columns} rows={transactions} />
 				</div>
 			</div>
 		</>

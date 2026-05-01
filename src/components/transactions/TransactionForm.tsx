@@ -10,6 +10,8 @@ interface Props {
     onSubmit: (data: any) => void;
     categories: Category[];
     accounts: Account[];
+    lastDate?: string;
+    setLastDate?(data: any): void;
 }
 
 type TransactionFormData = {
@@ -22,13 +24,13 @@ type TransactionFormData = {
     accountId: string;
 };
 
-export default function TransactionForm({ initialData, onSubmit, categories, accounts }: Props) {
+export default function TransactionForm({ initialData, onSubmit, categories, accounts, lastDate = new Date().toISOString().split("T")[0], setLastDate }: Props) {
     const [form, setForm] = useState<TransactionFormData>({
         title: "",
         amount: 0,
         description: "",
         type: "EXPENSE",
-        date: new Date().toISOString(),
+        date: lastDate,
         categoryId: "",
         accountId: ""
     })
@@ -40,7 +42,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
                 amount: initialData.amount,
                 description: initialData.description ?? "",
                 type: initialData.type,
-                date: new Date(initialData.date).toISOString(),
+                date: new Date(initialData.date).toISOString().split("T")[0],
                 categoryId: initialData.category?.id ?? "",
                 accountId: initialData.account?.id ?? ""
             })
@@ -56,6 +58,8 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
             ...prev,
             [name]: value
         }));
+
+        if (name === "date" && setLastDate) setLastDate(value);
     }
 
     function handleTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {
