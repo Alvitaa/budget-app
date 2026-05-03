@@ -23,22 +23,27 @@ import { FaCircle } from "react-icons/fa6";
 const columns: Column<Transaction>[] = [
 	{
 		header: "Fecha",
+		className: "w-1/12",
 		render: (t) => t.date.split("T")[0]
 	},
 	{
 		header: "Tipo",
+		className: "w-1/12",
 		render: (t) => TransactionTypeLabels[t.type]
 	},
 	{
 		header: "Categoría",
+		className: "",
 		render: (t) => t.category?.name ?? "No especificada"
 	},
 	{
 		header: "Título",
+		className: "",
 		render: (t) => t.title
 	},
 	{
 		header: "Monto",
+		className: "",
 		render: (t) => (
 			<div className="flex place-content-between">
 				<p>S/.</p>
@@ -47,35 +52,19 @@ const columns: Column<Transaction>[] = [
 		)
 	},
 	{
-		header: "Description",
-		className: "w-2/9!",
-		render: (t) => t.description ? t.description : "-"
-	},
-	{
 		header: "Cuenta",
+		className: "",
 		render: (t) => t.account?.name ?? "No especificada"
-	},
-	{
-		header: "Acciones",
-		render: (t) => (
-			<div className="flex place-content-between">
-				<p>Edit</p><p> Delete</p>
-			</div>
-		)
-	},
+	}
 ]
 
 export default function DashboardPage() {
 	const router = useRouter();
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [transactionPage, setTransactionPage] = useState(0);
 	const [transactionsPerPage, setTransactionPerPage] = useState(20);
 
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
-	const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
-	const [categories, setCategories] = useState<Category[]>([]);
 	const [accounts, setAccounts] = useState<Account[]>([]);
 	const [filter, setFilter] = useState<DateFilter>(() => {
 		const date = new Date;
@@ -105,54 +94,6 @@ export default function DashboardPage() {
 		router.refresh();
 	}
 
-	function handleCreate() {
-		setSelectedTransaction(null);
-		setIsModalOpen(true);
-	}
-
-	function handleEdit(transaction: Transaction) {
-		setSelectedTransaction(transaction);
-		setIsModalOpen(true);
-	}
-
-	function confirmDelete(transaction: Transaction) {
-		setSelectedTransaction(transaction);
-		setIsDeleteModalOpen(true);
-	}
-
-	async function handleDelete(id: string) {
-		try {
-			await apiFetch(`transactions/${id}`, {
-				method: "DELETE",
-			});
-
-			setIsDeleteModalOpen(false);
-			fetchTransactions();
-		} catch (error) {
-			console.error("Error eliminando el movimiento:", error)
-		}
-	}
-
-	async function handleSubmit(data: any) {
-		if (selectedTransaction) {
-			await apiFetch(`transactions/${selectedTransaction.id}`, {
-				method: "PATCH",
-				body: JSON.stringify({
-					...data,
-				}),
-			});
-		} else {
-			console.log("Creando transacción...")
-			await apiFetch("transactions", {
-				method: "POST",
-				body: JSON.stringify(data),
-			});
-		}
-
-		setIsModalOpen(false);
-		fetchTransactions();
-	}
-
 	async function fetchTransactions() {
 		try {
 			const data = await apiFetch(`transactions?skip=${transactionPage}&take=${transactionsPerPage}`, {
@@ -176,20 +117,8 @@ export default function DashboardPage() {
 		}
 	}
 
-	async function fetchCategories() {
-		try {
-			const data = await apiFetch("categories", {
-				method: "GET",
-			})
-			setCategories(data);
-		} catch (e) {
-			console.error("Error cargando categorías:", e);
-		}
-	}
-
 	useEffect(() => {
 		fetchAccounts();
-		fetchCategories();
 		fetchTransactions();
 	}, [])
 
@@ -260,115 +189,9 @@ export default function DashboardPage() {
 					</div>
 				</div>
 				<div className="col-span-3 h-full">
-					<Table className="bg-white flex-1 card-border overflow-hidden rounded-xl w-full h-full text-left" columnClassName="w-1/9" columns={columns} rows={transactions} />
+					<Table className="bg-white flex-1 card-border overflow-hidden rounded-xl w-full h-full" columnClassName="w-1/9 text-center" columns={columns} rows={transactions} />
 				</div>
 			</div>
 		</>
 	)
-
-	return (
-		<>
-			<div className="flex items-center justify-between mb-6">
-				<PageHeader title="Dashboard" />
-
-				<button onClick={() => Logout()} className="px-4 py-2 rounded-md border border-gray-300 text-sm hover:bg-gray-100 transition cursor-pointer">
-					Logout
-				</button>
-			</div>
-
-			<div className="flex gap-4">
-				<button onClick={handleCreate} className="bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
-					+ Nuevo Movimiento
-				</button>
-
-				<button
-					onClick={() => router.push("/categories")}
-					className="px-4 py-2 bg-blue-500 text-white rounded cursor-pointer"
-				>
-					Ver Categorías
-				</button>
-
-				<button
-					onClick={() => router.push("/accounts")}
-					className="px-4 py-2 bg-green-500 text-white rounded cursor-pointer"
-				>
-					Ver Cuentas
-				</button>
-			</div>
-
-			<div className="mt-5">
-				{isLoaded &&
-					<table className="w-full border border-collapse table-fixed">
-						<thead>
-							<tr className="bg-gray-200">
-								<th className="p-2 border w-1/9">Fecha</th>
-								<th className="p-2 border w-1/9">Tipo</th>
-								<th className="p-2 border w-1/9">Categoría</th>
-								<th className="p-2 border w-1/9">Título</th>
-								<th className="p-2 border w-1/9">Monto</th>
-								<th className="p-2 border w-2/9">Descripción</th>
-								<th className="p-2 border w-1/9">Cuenta</th>
-								<th className="p-2 border w-1/9">Acciones</th>
-							</tr>
-						</thead>
-						<tbody>
-							{transactions.map((transaction: Transaction) => (
-								<tr key={transaction.id}>
-									<td className="p-2 border truncate">{transaction.date.split("T")[0]}</td>
-									<td className="p-2 border truncate">{TransactionTypeLabels[transaction.type]}</td>
-									<td className="p-2 border truncate">{transaction.category ? transaction.category.name : "No especificada"}</td>
-									<td className="p-2 border truncate">{transaction.title}</td>
-									<td className="p-2 border truncate">
-										<div className="flex place-content-between">
-											<p>S/.</p>
-											<p>{transaction.amount.toFixed(2)}</p>
-										</div>
-									</td>
-									<td className="p-2 border truncate" title={transaction.description?.toString()}>{transaction.description ? transaction.description : "-"}</td>
-									<td className="p-2 border truncate">{transaction.account ? transaction.account.name : "No especificada"}</td>
-									<td className="p-2 border truncate">
-										<div className="flex gap-2 place-content-end">
-											<button onClick={() => handleEdit(transaction)} className="w-20 px-2 py-1 bg-yellow-400 rounded cursor-pointer">
-												Editar
-											</button>
-											<button onClick={() => confirmDelete(transaction)} className="w-20 px-2 py-1 bg-red-500 text-white rounded cursor-pointer">
-												Eliminar
-											</button>
-										</div>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				}
-				{!isLoaded &&
-					<h2>You have no transactions registered. Register one!</h2>
-				}
-			</div>
-
-			<Modal
-				isOpen={isModalOpen}
-				onClose={() => setIsModalOpen(false)}
-				title={selectedTransaction ? "Editar" : "Crear"}
-			>
-				<TransactionForm initialData={selectedTransaction} onSubmit={handleSubmit} categories={categories} accounts={accounts} />
-			</Modal>
-
-			<Modal
-				isOpen={isDeleteModalOpen}
-				onClose={() => setIsDeleteModalOpen(false)}
-				title="¿Estás seguro?"
-			>
-				<p>Esta acción es irreversible.</p>
-				<div className="flex place-content-around gap-5 mt-5">
-					<button onClick={() => handleDelete(selectedTransaction!.id)} className="px-2 py-2 w-full bg-red-500 rounded text-white font-bold cursor-pointer">
-						Sí, borrar
-					</button>
-					<button onClick={() => setIsDeleteModalOpen(false)} className="px-2 py-2 w-full bg-gray-200 rounded cursor-pointer">
-						No, cancelar
-					</button>
-				</div>
-			</Modal>
-		</>
-	);
 }

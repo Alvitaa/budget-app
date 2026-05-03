@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { IoCardOutline, IoCardSharp, IoCashOutline, IoCashSharp, IoHomeOutline, IoHomeSharp, IoMenuSharp, IoPricetagsOutline, IoPricetagsSharp, IoReceiptOutline, IoReceiptSharp, IoStatsChartOutline, IoStatsChartSharp } from "react-icons/io5";
+import { IoCardOutline, IoCardSharp, IoCashOutline, IoCashSharp, IoHomeOutline, IoHomeSharp, IoMenuSharp, IoPricetagsOutline, IoPricetagsSharp, IoReceiptOutline, IoReceiptSharp, IoStatsChartOutline, IoStatsChartSharp, IoSwapHorizontalOutline, IoSwapHorizontalSharp } from "react-icons/io5";
 
 type SidebarProps = {
     className?: string;
@@ -20,6 +20,7 @@ export default function Sidebar({ isOpen, setIsOpen, className }: SidebarProps) 
         { icon: <IoPricetagsOutline />, iconFill: <IoPricetagsSharp />, label: "Categorías", href: "/categories" },
         { icon: <IoCardOutline />, iconFill: <IoCardSharp />, label: "Cuentas", href: "/accounts" },
         { icon: <IoCashOutline />, iconFill: <IoCashSharp />, label: "Presupuestos", href: "/budgets" },
+        { icon: <IoSwapHorizontalOutline />, iconFill: <IoSwapHorizontalSharp />, label: "Transferencias", href: "/transfers" },
     ];
 
     function handleRouting(href: string) {
