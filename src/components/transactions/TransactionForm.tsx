@@ -12,6 +12,8 @@ interface Props {
     accounts: Account[];
     lastDate?: string;
     setLastDate?(data: any): void;
+    lastAccount?: string;
+    setLastAccount?(data: any): void;
 }
 
 type TransactionFormData = {
@@ -24,7 +26,11 @@ type TransactionFormData = {
     accountId: string;
 };
 
-export default function TransactionForm({ initialData, onSubmit, categories, accounts, lastDate = new Date().toISOString().split("T")[0], setLastDate }: Props) {
+export default function TransactionForm({
+     initialData, onSubmit, categories, accounts,
+     lastDate = new Date().toISOString().split("T")[0], setLastDate,
+     lastAccount = "", setLastAccount,
+    }: Props) {
     const [form, setForm] = useState<TransactionFormData>({
         title: "",
         amount: 0,
@@ -32,7 +38,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
         type: "EXPENSE",
         date: lastDate,
         categoryId: "",
-        accountId: ""
+        accountId: lastAccount
     })
 
     useEffect(() => {
@@ -60,6 +66,7 @@ export default function TransactionForm({ initialData, onSubmit, categories, acc
         }));
 
         if (name === "date" && setLastDate) setLastDate(value);
+        if (name === "accountId" && setLastAccount) setLastAccount(value);
     }
 
     function handleTypeChange(e: React.ChangeEvent<HTMLSelectElement>) {

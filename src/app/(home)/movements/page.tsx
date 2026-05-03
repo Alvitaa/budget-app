@@ -18,6 +18,7 @@ export default function MovementsPage() {
     const [transactionPage, setTransactionPage] = useState(0);
     const [transactionsPerPage, setTransactionPerPage] = useState(20);
     const [lastDate, setLastDate] = useState(new Date().toISOString().split("T")[0]);
+    const [lastAccount, setLastAccount] = useState("");
 
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
@@ -184,7 +185,16 @@ export default function MovementsPage() {
                 onClose={() => setIsModalOpen(false)}
                 title={selectedTransaction ? "Editar" : "Crear"}
             >
-                <TransactionForm initialData={selectedTransaction} onSubmit={handleSubmit} categories={categories} accounts={accounts} lastDate={lastDate} setLastDate={setLastDate} />
+                <TransactionForm
+                    initialData={selectedTransaction}
+                    onSubmit={handleSubmit}
+                    categories={categories}
+                    accounts={accounts}
+                    lastDate={lastDate}
+                    setLastDate={setLastDate}
+                    lastAccount={lastAccount}
+                    setLastAccount={setLastAccount}
+                />
             </Modal>
 
             <Modal
