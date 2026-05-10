@@ -81,7 +81,7 @@ export default function TransactionForm({
 
     return (
         <form onSubmit={(e) => { e.preventDefault(); onSubmit(form); }} className="flex flex-col gap-5">
-            <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Detalle" className="w-full border p-2" />
+            <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Detalle" className="w-full border p-2" autoFocus />
             <select className="w-full border p-2" name="type" value={form.type} onChange={handleTypeChange}>
                 {Object.entries(TransactionTypeLabels).map(([value, label]) => (
                     <option key={value} value={value}>

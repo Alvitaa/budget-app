@@ -15,6 +15,7 @@ import { removeToken } from "@/lib/auth";
 import { Account } from "@/types/account";
 import { Category } from "@/types/category";
 import DateFilter from "@/types/componentTypes/DateFilter";
+import { Summary } from "@/types/Summary";
 import { Transaction } from "@/types/transaction";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,6 +67,7 @@ export default function DashboardPage() {
 
 	const [transactions, setTransactions] = useState<Transaction[]>([]);
 	const [accounts, setAccounts] = useState<Account[]>([]);
+	const [amounts, setAmounts] = useState<Summary>();
 	const [filter, setFilter] = useState<DateFilter>(() => {
 		const date = new Date;
 		return {
@@ -117,9 +119,22 @@ export default function DashboardPage() {
 		}
 	}
 
+	async function fetchAmounts() {
+		try {
+			const data = await apiFetch(`analytics?year=${2026}`, {
+				method: "GET"
+			})
+
+			setAmounts(data.summary);
+		} catch (e) {
+			console.error("Error cargando los montos", e);
+		}
+	}
+
 	useEffect(() => {
 		fetchAccounts();
 		fetchTransactions();
+		fetchAmounts();
 	}, [])
 
 	return (
@@ -131,13 +146,13 @@ export default function DashboardPage() {
 					<BalanceCard title="Balance" banks={accounts} currency="S/." />
 				</div>
 				<div className="col-span-1">
-					<AmountCard title="Ingresos" currency="S/." amount={1234.98} amountColor="text-lime-600" />
+					<AmountCard title="Ingresos" currency="S/." amount={amounts?.income || 0} amountColor="text-lime-600" />
 				</div>
 				<div className="col-span-1">
-					<AmountCard title="Gastos" currency="S/." amount={1234.98} amountColor="text-red-500" />
+					<AmountCard title="Gastos" currency="S/." amount={amounts?.expense || 0} amountColor="text-red-500" />
 				</div>
 				<div className="col-span-1">
-					<AmountCard title="Ahorros" currency="S/." amount={1234.98} />
+					<AmountCard title="Ahorros" currency="S/." amount={amounts?.saving || 0} />
 				</div>
 
 				{/* Second row */}

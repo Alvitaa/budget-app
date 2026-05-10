@@ -36,7 +36,7 @@ export default function MovementsPage() {
         },
         {
             header: "Categoría",
-            render: (t) => t.category?.name ?? "No especificada"
+            render: (t) => t.category?.name ?? "-"
         },
         {
             header: "Título",
@@ -58,7 +58,7 @@ export default function MovementsPage() {
         },
         {
             header: "Cuenta",
-            render: (t) => t.account?.name ?? "No especificada"
+            render: (t) => t.account?.name ?? "-"
         },
         {
             header: "",
@@ -113,7 +113,6 @@ export default function MovementsPage() {
                 }),
             });
         } else {
-            console.log("Creando transacción...")
             await apiFetch("transactions", {
                 method: "POST",
                 body: JSON.stringify(data),
