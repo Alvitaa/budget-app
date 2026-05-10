@@ -16,7 +16,7 @@ export default function MovementsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isLoaded, setIsLoaded] = useState(false);
     const [transactionPage, setTransactionPage] = useState(0);
-    const [transactionsPerPage, setTransactionPerPage] = useState(20);
+    const [transactionsPerPage, setTransactionPerPage] = useState(50);
     const [lastDate, setLastDate] = useState(new Date().toISOString().split("T")[0]);
     const [lastAccount, setLastAccount] = useState("");
 
@@ -45,7 +45,7 @@ export default function MovementsPage() {
         {
             header: "Monto",
             render: (t) => (
-                <div className="flex place-content-between">
+                <div className={`flex place-content-between ${t.type === "INCOME" && "text-green-600"}`}>
                     <p>S/.</p>
                     <p>{t.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                 </div>

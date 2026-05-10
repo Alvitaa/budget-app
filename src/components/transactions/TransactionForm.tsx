@@ -101,7 +101,7 @@ export default function TransactionForm({
                     ))}
                 </select>
             }
-            <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="" className="w-full border p-2" />
+            <input type="number" name="amount" value={form.amount} min="0" step="0.01" onChange={handleChange} placeholder="" className="w-full border p-2" />
             <input type="date" name="date" value={form.date} onChange={handleChange} placeholder="" className="w-full border p-2" />
             {accounts.length <= 0 ?
                 <select className="w-full border p-2 text-gray-400 bg-gray-200" disabled >

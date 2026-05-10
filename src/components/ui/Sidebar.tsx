@@ -1,8 +1,9 @@
 "use client"
 
+import { removeToken } from "@/lib/auth";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { IoCardOutline, IoCardSharp, IoCashOutline, IoCashSharp, IoHomeOutline, IoHomeSharp, IoMenuSharp, IoPricetagsOutline, IoPricetagsSharp, IoReceiptOutline, IoReceiptSharp, IoStatsChartOutline, IoStatsChartSharp, IoSwapHorizontalOutline, IoSwapHorizontalSharp } from "react-icons/io5";
+import { IoCardOutline, IoCardSharp, IoCashOutline, IoCashSharp, IoHomeOutline, IoHomeSharp, IoLogOutOutline, IoMenuSharp, IoPricetagsOutline, IoPricetagsSharp, IoReceiptOutline, IoReceiptSharp, IoStatsChartOutline, IoStatsChartSharp, IoSwapHorizontalOutline, IoSwapHorizontalSharp } from "react-icons/io5";
 
 type SidebarProps = {
     className?: string;
@@ -28,9 +29,16 @@ export default function Sidebar({ isOpen, setIsOpen, className }: SidebarProps) 
         router.push(href)
     }
 
+    function Logout() {
+		removeToken();
+		router.push("/login");
+		router.refresh();
+    }
+
     const animation = "transition-all duration-400 ease-in-out";
     return (
-        <aside className={`rounded-r-2xl flex flex-col gap-10 overflow-hidden max-w-1/6 shadow-inset-m ${animation} ${className} ${isOpen ? "w-56" : "w-16"}`}>
+        <aside className={`rounded-r-2xl flex flex-col gap-10 overflow-hidden max-w-1/6 justify-between shadow-inset-m ${animation} ${className} ${isOpen ? "w-56" : "w-16"}`}>
+            <div className="flex flex-col gap-10">
             <button
                 className="text-2xl p-5 cursor-pointer w-16"
                 onClick={() => { setIsOpen(!isOpen) }}
@@ -60,6 +68,21 @@ export default function Sidebar({ isOpen, setIsOpen, className }: SidebarProps) 
                     })}
 
                 </ul>
+                </div>
+            </div>
+
+            <div
+                className="flex items-center px-5 py-5 gap-5 text-lg font-medium cursor-pointer text-muted hover:text-red-600 hover:bg-neutral-200"
+                onClick={Logout}
+            >
+                <span className={`text-2xl rotate-180`}>
+                    <IoLogOutOutline/>
+                </span>
+                <span
+                    className={`transition-opacity duration-400 ${isOpen ? "opacity-100 delay-50" : "opacity-0"} ease-in-out`}
+                >
+                    Logout
+                </span>
             </div>
         </aside>
     );
